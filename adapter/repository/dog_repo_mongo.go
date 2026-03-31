@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
+	e "hexagonal2/pkg/errors"
 	"hexagonal2/core/entity"
 )
 
@@ -54,7 +54,7 @@ func (r *dogsRepositoryMongo) GetDogs() ([]entity.Dogs, error) {
 
 	cur, err := r.col.Find(ctx, bson.M{})
 	if err != nil {
-		return nil, err
+		return nil, e.ErrInternalServer
 	}
 	defer cur.Close(ctx)
 
@@ -62,7 +62,7 @@ func (r *dogsRepositoryMongo) GetDogs() ([]entity.Dogs, error) {
 	for cur.Next(ctx) {
 		var m DogMongo
 		if err := cur.Decode(&m); err != nil {
-			return nil, err
+			return nil, e.ErrInternalServer
 		}
 		out = append(out, dogMongoToEn(m))
 	}
@@ -75,7 +75,7 @@ func (r *dogsRepositoryMongo) GetADogs(id string) (*entity.Dogs, error) {
 
 	var m DogMongo
 	if err := r.col.FindOne(ctx, bson.M{"id": id}).Decode(&m); err != nil {
-		return nil, err
+		return nil, e.ErrDogNotFound
 	}
 	en := dogMongoToEn(m)
 	return &en, nil

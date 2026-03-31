@@ -1,12 +1,15 @@
 package service
 
-import ("fmt"
-"hexagonal2/core/ports"
-"hexagonal2/core/entity")
+import (
+	"fmt"
+	"hexagonal2/core/entity"
+	"hexagonal2/core/middleware"
+	"hexagonal2/core/ports"
+	e "hexagonal2/pkg/errors"
+)
 
 type userService struct{
 	repo ports.UserRepository
-	
 }
 
 func NewUserService (repo ports.UserRepository) *userService {
@@ -44,6 +47,7 @@ func (r userService) GetUser(id string)(*entity.UserRes,error){
 			Email: user.Email,
 			Tel: user.Tel,
 		}
+	
 	return &usResp,nil
 	
 }
@@ -55,4 +59,28 @@ func (r userService) AddUser(p entity.User)error{
 		return err
 	}
 	return nil
+}
+
+func (r userService) Login(email string,password string)(string,error){
+	user,err := r.repo.GetUserByEmail(email)
+	if err != nil{
+		return "",err
+	}
+	ok := middleware.CheckPasswordHash([]byte(password), []byte(user.Password))
+	if !ok {
+		return "", e.ErrInvalidCredentials
+	}
+
+	jwtWrapper := middleware.JwtWrapper{
+		SecretKey:       "SvNQpBN8y3qlVrsGAYYWoJJk56LtzFHx",
+		Issuer:          "authService",
+		ExpirationHours: 24,
+	}
+
+	token, err := jwtWrapper.GenerateToken(user.Id, user.Role)
+	if err != nil {
+		return "", e.ErrInternalServer
+	}
+
+	return token,nil
 }

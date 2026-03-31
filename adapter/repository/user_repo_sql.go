@@ -3,7 +3,8 @@ package repository
 import ("hexagonal2/core/entity"
 "gorm.io/gorm"
 "github.com/google/uuid"
-"hexagonal2/core/middleware")
+"hexagonal2/core/middleware"
+e "hexagonal2/pkg/errors")
 
 type userRepositoryDB struct{
 	db *gorm.DB
@@ -56,7 +57,7 @@ func (r userRepositoryDB) GetUsers()([]entity.User,error){
 	var pe []UserDB
 	result := r.db.Find(&pe)
 	if  result.Error != nil{
-		return nil,result.Error
+		return nil,e.ErrUserNotFound
 	}
 	var peo []entity.User
 	for _, u := range pe{
@@ -69,7 +70,7 @@ func(r userRepositoryDB)GetUser(id string)(*entity.User,error){
 	var pe UserDB
 	result := r.db.Find(&pe,"id = ?",id)
 	if result.Error != nil{
-		return nil,result.Error
+		return nil,e.ErrUserNotFound
 	}
 	peo := userGormToEn(pe)
 	return &peo,nil
@@ -79,7 +80,7 @@ func (r userRepositoryDB) AddUser(p entity.User)error{
 	p.Id = uuid.New().String()
 	Password, err := middleware.HashPassword(p.Password)
 	if err != nil {
-		return err
+		return e.ErrInternalServer
 	}
 	p.Password = Password
 	hu := userEnToGorm(p)
@@ -89,4 +90,14 @@ func (r userRepositoryDB) AddUser(p entity.User)error{
 		return result.Error
 	}
 	return nil
+}
+
+func (r userRepositoryDB) GetUserByEmail(email string)(*entity.User,error){
+	var pe UserDB
+	result := r.db.Find(&pe,"email = ?",email)
+	if result.Error != nil{
+		return nil,e.ErrUserNotFound
+	}
+	m := userGormToEn(pe)
+	return &m,nil
 }

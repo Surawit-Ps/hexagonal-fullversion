@@ -9,7 +9,7 @@ type ZapLogger struct {
 }
 
 func NewZapLogger() (*ZapLogger, error) {
-	logger, err := zap.NewProduction()
+	logger, err := zap.NewDevelopment()
 	if err != nil {
 		return nil, err
 	}

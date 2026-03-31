@@ -2,7 +2,8 @@ package repository
 
 import ("hexagonal2/core/entity"
 "gorm.io/gorm"
-"github.com/google/uuid")
+"github.com/google/uuid"
+e "hexagonal2/pkg/errors")
 
 type dogsRepositoryDB struct{
 	db *gorm.DB
@@ -44,7 +45,10 @@ func (r dogsRepositoryDB)GetDogs()([]entity.Dogs,error){
 	var dogs []DogsModel
 	result := r.db.Find(&dogs)
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, e.ErrInternalServer
+	}
+	if result.RowsAffected == 0 {
+		return nil, e.ErrInternalServer
 	}
 	var dogEntities []entity.Dogs
 	for _, d := range dogs {
@@ -59,7 +63,7 @@ func (r dogsRepositoryDB)GetADogs(id string)(*entity.Dogs,error){
 	var dog DogsModel
 	result := r.db.Find(&dog,"id = ? OR human_id = ?",id,id)
 	if result.Error != nil{
-		return nil,result.Error
+		return nil,e.ErrDogNotFound
 	}
 	edog := GormToEn(dog)
 	return &edog,nil
@@ -71,7 +75,7 @@ func(r dogsRepositoryDB)AddDog(d entity.Dogs,userID string)error{
 	dog := EnToGorm(d)
 	result := r.db.Create(&dog)
 	if result.Error != nil{
-		return result.Error
+		return e.ErrInternalServer
 	}
 	return nil
 }

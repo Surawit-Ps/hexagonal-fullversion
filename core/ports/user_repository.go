@@ -6,4 +6,5 @@ type UserRepository interface{
 	GetUsers()([]entity.User,error)
 	GetUser(string)(*entity.User,error)
 	AddUser(entity.User)error
+	GetUserByEmail(string)(*entity.User,error)
 }

@@ -10,6 +10,7 @@ import (
 	// "go.mongodb.org/mongo-driver/mongo/options"
 	"hexagonal2/core/middleware"
 	"hexagonal2/core/entity"
+	e "hexagonal2/pkg/errors"
 )
 
 type userRepositoryMongo struct {
@@ -63,7 +64,7 @@ func (r *userRepositoryMongo) GetUsers() ([]entity.User, error) {
 
 	cur, err := r.col.Find(ctx, bson.M{})
 	if err != nil {
-		return nil, err
+		return nil,e.ErrInternalServer 
 	}
 	defer cur.Close(ctx)
 
@@ -71,7 +72,7 @@ func (r *userRepositoryMongo) GetUsers() ([]entity.User, error) {
 	for cur.Next(ctx) {
 		var m UserMongo
 		if err := cur.Decode(&m); err != nil {
-			return nil, err
+			return nil, e.ErrInternalServer
 		}
 		out = append(out, userMongoToEn(m))
 	}
@@ -84,7 +85,7 @@ func (r *userRepositoryMongo) GetUser(id string) (*entity.User, error) {
 
 	var m UserMongo
 	if err := r.col.FindOne(ctx, bson.M{"id": id}).Decode(&m); err != nil {
-		return nil, err
+		return nil, e.ErrUserNotFound
 	}
 	en := userMongoToEn(m)
 	return &en, nil
@@ -100,11 +101,22 @@ func (r *userRepositoryMongo) AddUser(p entity.User) error {
 
 	Password, err := middleware.HashPassword(p.Password)
 	if err != nil {
-		return err
+		return e.ErrInternalServer
 	}
 	p.Password = Password
 
 
 	_, err = r.col.InsertOne(ctx, userEnToMongo(p))
 	return err
+}
+
+func (r *userRepositoryMongo) GetUserByEmail(email string) (*entity.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	var m UserMongo
+	if err := r.col.FindOne(ctx, bson.M{"email": email}).Decode(&m); err != nil {
+		return nil, e.ErrUserNotFound
+	}
+	en := userMongoToEn(m)
+	return &en, nil
 }
