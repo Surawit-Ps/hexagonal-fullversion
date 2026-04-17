@@ -1,4 +1,4 @@
-package repository
+package sql
 
 import ("hexagonal2/core/entity"
 "gorm.io/gorm"

@@ -12,4 +12,5 @@ var (
 	ErrBadRequest = errors.New("bad request")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrNotFound = errors.New("not found")
+	ErrInvalidID = errors.New("invalid ID")
 )

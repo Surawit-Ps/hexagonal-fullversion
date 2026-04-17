@@ -1,4 +1,4 @@
-package repository
+package sql
 
 import ("hexagonal2/core/entity"
 "gorm.io/gorm"
@@ -9,7 +9,7 @@ type dogsRepositoryDB struct{
 	db *gorm.DB
 }
 
-type DogsModel struct{
+type dogs struct{
 	Id string `gorm:"primaryKey"`
 	Name string
 	Age uint
@@ -21,8 +21,8 @@ func NewDogsRepositoryDB(db *gorm.DB) *dogsRepositoryDB{
 	return &dogsRepositoryDB{db:db}
 }
 
-func EnToGorm(d entity.Dogs)DogsModel{
-	return DogsModel{
+func EnToGorm(d entity.Dogs)dogs{
+	return dogs{
 		Id: d.Id,
 		Name: d.Name,
 		Age: d.Age,
@@ -31,7 +31,7 @@ func EnToGorm(d entity.Dogs)DogsModel{
 	}
 } 
 
-func GormToEn(d DogsModel)entity.Dogs{
+func GormToEn(d dogs)entity.Dogs{
 	return entity.Dogs{
 		Id: d.Id,
 		Name: d.Name,
@@ -42,7 +42,7 @@ func GormToEn(d DogsModel)entity.Dogs{
 }
 
 func (r dogsRepositoryDB)GetDogs()([]entity.Dogs,error){
-	var dogs []DogsModel
+	var dogs []dogs
 	result := r.db.Find(&dogs)
 	if result.Error != nil {
 		return nil, e.ErrInternalServer
@@ -60,7 +60,7 @@ func (r dogsRepositoryDB)GetDogs()([]entity.Dogs,error){
 }
 
 func (r dogsRepositoryDB)GetADogs(id string)(*entity.Dogs,error){
-	var dog DogsModel
+	var dog dogs
 	result := r.db.Find(&dog,"id = ? OR human_id = ?",id,id)
 	if result.Error != nil{
 		return nil,e.ErrDogNotFound

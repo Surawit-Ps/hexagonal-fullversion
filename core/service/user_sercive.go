@@ -6,26 +6,30 @@ import (
 	"hexagonal2/core/middleware"
 	"hexagonal2/core/ports"
 	e "hexagonal2/pkg/errors"
+	"hexagonal2/pkg/logs"
+	// "hexagonal2/pkg/redis"
 )
 
 type userService struct{
 	repo ports.UserRepository
+	zlog logs.ZapLogger
+	// ch redis.Redis
 }
 
-func NewUserService (repo ports.UserRepository) *userService {
-	return &userService{repo: repo}
+func NewUserService (repo ports.UserRepository, zlog logs.ZapLogger) *userService {
+	return &userService{repo: repo, zlog: zlog}
 }
 
 func (r userService) GetAllUser()([]entity.UserRes,error){
 	user,err := r.repo.GetUsers()
 	if err != nil{
-		fmt.Print(err)
+		r.zlog.Error("Error occurred while fetching users", "error", err)
 		return nil,err
 	}
 	var usRes []entity.UserRes
 	for _,u := range user{
 		usResp := entity.UserRes{
-			ID: u.Id,
+			ID: u.UserID,
 			Name: u.Name,
 			LastName: u.LastName,
 			Email: u.Email,
@@ -43,7 +47,7 @@ func (r userService) GetUser(id string)(*entity.UserRes,error){
 		return nil,err
 	}
 	usResp := entity.UserRes{
-			ID: user.Id,
+			ID: user.UserID,
 			Name: user.Name,
 			LastName: user.LastName,
 			Email: user.Email,
@@ -83,6 +87,7 @@ func (r userService) Login(email string,password string)(string,error){
 	if err != nil {
 		return "", e.ErrInternalServer
 	}
+	r.zlog.Info("User logged in successfully", "userID", user.Id)
 
 	return token,nil
 }
