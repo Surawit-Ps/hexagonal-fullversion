@@ -22,32 +22,40 @@ type bookingRepositoryMongo struct {
 
 type BookingMongo struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	UserID    string `bson:"user_id" json:"user_id"`
-	DogID     string `bson:"dog_id" json:"dog_id"`
+	BookingID  string `bson:"booking_id" json:"booking_id"`
+	RoomID     string `bson:"room_id" json:"room_id"`
+	CustomerID     string `bson:"customer_id" json:"customer_id"`
 	StartDate time.Time `bson:"start_date" json:"start_date"`
+	Service    string `bson:"service" json:"service"`
 	EndDate   time.Time `bson:"end_date" json:"end_date"`
 	Status    string `bson:"status" json:"status"` // Booked, Completed, Cancelled
+    CreatedAt  time.Time
 }
 
 func bookingEnToMongo(b entity.Booking) BookingMongo {
 	return BookingMongo{
 		ID:        primitive.NewObjectID(),
-		UserID:    b.OwnerID,
-		DogID:     b.PetID,
+		CustomerID:     b.CustomerID,
+		RoomID:     b.RoomID,
 		StartDate: b.StartTime,
 		EndDate:   b.EndTime,
 		Status:    b.Status,
+		Service:   b.Service,
+		CreatedAt: time.Now(),
 	}
 }
 
 func bookingMongoToEn(m BookingMongo) entity.Booking {
 	return entity.Booking{
 		ID:        m.ID.Hex(),
-		OwnerID:   m.UserID,
-		PetID:     m.DogID,
+		BookingID: m.BookingID,
+		CustomerID: m.CustomerID,
+		RoomID:     m.RoomID,
 		StartTime: m.StartDate,
 		EndTime:   m.EndDate,
 		Status:    m.Status,
+		Service:   m.Service,
+		CreatedAt: m.CreatedAt,
 	}
 }
 
@@ -137,11 +145,14 @@ func (r *bookingRepositoryMongo) UpdateBooking(id string, b entity.Booking) erro
 	}
 	update := bson.M{
 		"$set": bson.M{
-			"user_id":    b.OwnerID,
-			"dog_id":     b.PetID,
+			"booking_id": b.BookingID,
+			"customer_id": b.CustomerID,
+			"room_id": b.RoomID,
 			"start_date": b.StartTime,
-			"end_date":   b.EndTime,
+			"end_date": b.EndTime,
 			"status":     b.Status,
+			"service":    b.Service,
+			"created_at": b.CreatedAt,
 		},
 	}
 	result, err := r.col.UpdateOne(ctx,

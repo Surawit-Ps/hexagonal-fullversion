@@ -21,8 +21,8 @@ func (s *BookingService) GetAllBookings() ([]entity.BookingRes, error) {
 	for _, b := range bookings {
 		br := entity.BookingRes{
 			BookingID: b.BookingID,
-			PetID:    b.PetID,
-			OwnerID:    b.OwnerID,
+			CustomerID: b.CustomerID,
+			RoomID:     b.RoomID,
 			Service:    b.Service,
 			StartTime:  b.StartTime,
 			EndTime:    b.EndTime,
@@ -41,8 +41,8 @@ func (s *BookingService) GetBooking(id string) (*entity.BookingRes, error) {
 	}
 	br := entity.BookingRes{
 		BookingID: booking.BookingID,
-		PetID:    booking.PetID,
-		OwnerID:    booking.OwnerID,
+		CustomerID: booking.CustomerID,
+		RoomID:     booking.RoomID,
 		StartTime:  booking.StartTime,
 		EndTime:    booking.EndTime,
 		Status:    booking.Status,

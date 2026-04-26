@@ -7,8 +7,8 @@ import (
 type Booking struct {
     ID        string
     BookingID string
-    PetID     string
-    OwnerID   string
+    RoomID     string
+    CustomerID   string
     Service   string
     StartTime time.Time
     EndTime   time.Time
@@ -18,8 +18,8 @@ type Booking struct {
 
 type BookingRes struct {
     BookingID string
-	PetID     string
-	OwnerID   string
+	RoomID     string
+	CustomerID   string
     Service   string
 	StartTime time.Time
 	EndTime   time.Time

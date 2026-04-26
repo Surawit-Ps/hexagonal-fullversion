@@ -20,8 +20,8 @@ func NewBookingRepositoryDB(db *gorm.DB) bookingRepositoryDB{
 type Booking struct{
 	ID string `gorm:"primaryKey"`
 	BookingID string
-	OwnerID string
-	PetID string
+	RoomID  string
+	CustomerID string
 	Service string
 	StartDate time.Time
 	EndDate time.Time
@@ -32,8 +32,8 @@ func EnToGormBooking(b entity.Booking)Booking{
 	return Booking{
 		ID: b.ID,
 		BookingID: b.BookingID,
-		OwnerID: b.OwnerID,
-		PetID: b.PetID,
+		RoomID: b.RoomID,
+		CustomerID: b.CustomerID,
 		Service: b.Service,
 		StartDate: b.StartTime,
 		EndDate: b.EndTime,
@@ -45,8 +45,8 @@ func GormToEnBooking(b Booking)entity.Booking{
 	return entity.Booking{
 		ID: b.ID,
 		BookingID: b.BookingID,
-		OwnerID: b.OwnerID,
-		PetID: b.PetID,
+		RoomID: b.RoomID,
+		CustomerID: b.CustomerID,
 		Service: b.Service,
 		StartTime: b.StartDate,
 		EndTime: b.EndDate,

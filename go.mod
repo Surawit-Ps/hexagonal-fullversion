@@ -13,6 +13,8 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.1 // indirect
+	google.golang.org/protobuf v1.36.11 // indirect
 )
 
 require (
